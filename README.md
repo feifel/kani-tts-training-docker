@@ -43,10 +43,8 @@ python chunk_and_transcribe.py \
   --language de \
   --speaker Linda
 
-python create_hf_dataset.py -i /data/1-audio-chunks/Linda -o /data/2-base-datasets/Linda
+python create_base_dataset.py Linda
 ```
-
-
 
 ## Convert the dataset into a nano dataset
 ```bash
@@ -70,6 +68,58 @@ docker rm kani-tts-training
 ```bash
 docker rmi kani-tts-training:latest
 ```
+
+# Modify the individual projects 
+In case you want to modify the individual projects that are part of this docker file, then this section is for you.
+1. Create the project folder: 
+    ```bash
+    mkdir -p projects
+    cd projects
+    ```   
+2. Checkout the subprojects from their respective repositories:
+    ```bash
+    git clone https://github.com/feifel/kani-tts-training-wave2dataset.git 1-audio-to-dataset
+    git clone https://github.com/feifel/kani-tts-training-dataset2nano.git 2-dataset-to-nano
+    git clone https://github.com/feifel/kani-tts-training-finetune.git 3-nano-to-kanitts
+    ```   
+3. You can now start your id:
+    ```bash
+    deepagent-app 1-audio-to-dataset
+    ```   
+4. The container now needs to be started with the project folder mounted as a volume:
+    ```bash
+    cd ..    
+    docker create -it --gpus all --name kani-tts-training-dev \
+      -v "$(pwd)/data":/data \
+      -v "$(pwd)/models":/root/.cache/huggingface \
+      -v "$(pwd)/projects":/projects \
+      kani-tts-training:latest
+
+    docker start -ai kani-tts-training-dev
+    ```
+5. Inside the container, you then need to link the venv of the projects in /workspace to the projet in /project:
+    ```bash
+    ln -s /workspace/1-audio-to-dataset/venv /projects/1-audio-to-dataset/venv 
+    ln -s /workspace/2-dataset-to-nano/venv /projects/2-dataset-to-nano/venv 
+    ln -s /workspace/3-nano-to-kanitts/venv /projects/3-nano-to-kanitts/venv 
+    ```
+6. You can now modify the projects on your host with your IDE and test them on the docker image.
+    ```bash
+    cd /projects/1-audio-to-dataset
+    source "venv/bin/activate"
+    python chunk_and_transcribe.py \
+      -i /data/0-source-audio/Linda.wav \
+      -o /data/1-audio-chunks/Linda \
+      --silence_duration 0.5 \
+      --max_chunk_duration 5.0 \
+      --model large-v3 \
+      --device cuda \
+      --format csv \
+      --language de \
+      --speaker Linda
+    ```
+
+
 
 ## TODO
 - test kani-tts-training-wave2dataset
