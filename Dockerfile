@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     sox \
     libcudnn8 \
+    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
 # Setup kani-tts-training-wave2dataset
@@ -32,7 +33,7 @@ RUN sed -i 's/sudo //g' setup.sh && chmod +x setup.sh && yes '' | bash setup.sh
 # Setup finetune repo
 RUN git clone https://github.com/feifel/kani-tts-training-finetune.git /workspace/3-nano-to-kanitts
 WORKDIR /workspace/3-nano-to-kanitts
-# TODO: call make
+RUN make setup
 
 # Start an interactive shell in the /workspace
 WORKDIR /workspace

@@ -1,8 +1,9 @@
 # kani tts training
-This docker project contains everything for kani tts training, which is needed to add custom voices for kani tts. You can provide a large audio speech as wave file as input and it will split the audio file into chunks of max 5 seconds, optimized to fine tune TTS models. It also does STT to provide a metadata.csv file that contains the transcription for each of the generated audio chunks. 
-In a second step you then convert those chunks into a huggingface dataset file. 
-In the third step you then convert that dataset to a nano dataset, which is a special encoding that makes kani-tts very fast and minimize the delay in TTS generation.
-The last step is the fine-tuning step that creates the final model, that can be used by kani tts for inference, i.e. convert text to speech (TTS).
+This docker project contains everything for kani tts finetuning, which is needed to add custom voices for kani tts. To build your custom voice, you need a large audio speech file of 30-90 Minutes. That file than can be processed in 4 steps to build a custom voice:
+1. The large audio speech as wave file is split into chunks of max 5 seconds, optimized to fine tune TTS models. It also does STT to provide a metadata.csv file that contains the transcription for each of the generated audio chunks. 
+2. Convert those chunks into a huggingface dataset file
+3. Convert that dataset to a nano dataset, which is a special encoding that makes kani-tts very fast and minimize the delay in TTS generation.
+4. Run the actual fine-tuning step that creates the final model, that can be used by kani tts for inference, i.e. convert text to speech (TTS).
 
 ## How slicing is done
 1. Split the audio on silent passages that are > 500ms
@@ -26,7 +27,8 @@ docker create -it --gpus all --name kani-tts-training \
 docker start -ai kani-tts-training
 ```
 
-## Split the audio files you want
+## 1. Split the audio files you want
+**Prerequisite**: Ensure the audio file is placed in /data/0-source-audio
 Note: the first time it will download a 3 GByte LLM
 ```bash
 mkdir -p /data/0-source-audio
@@ -42,17 +44,37 @@ python chunk_and_transcribe.py \
   --format csv \
   --language de \
   --speaker Linda
+```
+**Output**: Subfolder with your speakers name in /data/1-audio-chunks/<speaker>
 
+## 2. Create the base dataset
+**Prerequisite**: audio junks and manifest.csv in /data/1-audio-chunks/<speaker>
+```bash
 python create_base_dataset.py Linda
 ```
+**Output**: nano dataset in /data/2-base-datasets/<speaker>
 
-## Convert the dataset into a nano dataset
+## 3. Convert the dataset into a nano dataset
+**Prerequisites**: base dataset must be in /data/2-base-datasets/<speaker>
 ```bash
 cd /workspace/2-dataset-to-nano
 source "venv/bin/activate"
-# edit the config.yaml
+# befor run the next command, edit the config.yaml for your needs
 python main.py
 ```
+**Output**: nano dataset in /data/3-nano-datasets/<speaker>
+
+## 4. Convert the nano dataset into a kani-tts-model
+**Prerequisite**: nano dataset must be in /data/3-nano-datasets/<speaker>
+```bash
+cd /workspace/3-nano-to-kanitts
+make login
+# befor run the next command, edit the following config files:
+# - dataset_config.yaml
+# - experiments.yaml
+make train
+```
+**Output**: /data/4-kani-tts-models/<speaker>
 
 ## Exit the terminal when done
 ```bash
@@ -119,10 +141,4 @@ In case you want to modify the individual projects that are part of this docker 
       --speaker Linda
     ```
 
-
-
-## TODO
-- test kani-tts-training-wave2dataset
-- test kani-tts-training-dataset2nano
-- add usage of kani-tts-training-finetune
 
