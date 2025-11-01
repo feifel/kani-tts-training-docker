@@ -18,31 +18,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcudnn8 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create workspace 
+# Setup kani-tts-training-wave2dataset
+RUN git clone https://github.com/feifel/kani-tts-training-wave2dataset.git /workspace/1-audio-to-dataset
+WORKDIR /workspace/1-audio-to-dataset
+RUN chmod +x setup.sh && bash setup.sh
+
+# Setup dataset2nano repo
+RUN git clone https://github.com/feifel/kani-tts-training-dataset2nano.git /workspace/2-dataset-to-nano
+WORKDIR /workspace/2-dataset-to-nano
+ENV TERM=xterm
+RUN sed -i 's/sudo //g' setup.sh && chmod +x setup.sh && yes '' | bash setup.sh
+
+# Setup finetune repo
+RUN git clone https://github.com/feifel/kani-tts-training-finetune.git /workspace/3-nano-to-kanitts
+WORKDIR /workspace/3-nano-to-kanitts
+# TODO: call make
+
+# Start an interactive shell in the /workspace
 WORKDIR /workspace
 
-# Add these lines after the existing WORKDIR /workspace line
-RUN mkdir -p /workspace/in /workspace/out
-
-# Clone the three training repositories into it
-RUN git clone https://github.com/feifel/kani-tts-training-wave2dataset.git \
- && git clone https://github.com/feifel/kani-tts-training-dataset2nano.git \
- && git clone https://github.com/feifel/kani-tts-training-finetune.git
-
-# Setup kani-tts-training-wave2dataset
-WORKDIR /workspace/kani-tts-training-wave2dataset
-mkdir -p in out
-RUN bash setup.sh
-
- # Setup dataset2nana repo
-WORKDIR /workspace/kani-tts-training-dataset2nano
-RUN yes '' | bash setup.sh
-
-
-
-# Expose workspace for mounting; default to an interactive shell
-VOLUME ["/workspace"]
-
-# Add volume for Hugging Face cache to persist model downloads
-VOLUME ["/root/.cache/huggingface"]
 CMD ["bash"]
