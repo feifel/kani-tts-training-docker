@@ -76,6 +76,14 @@ make train
 ```
 **Output**: /data/4-kani-tts-models/<speaker>
 
+## 5. Test the new kani-tts-model
+**Prerequisite**: Ensure the kani-tts-model is available in /data/4-kani-tts-models/<speaker>
+```bash
+cd /workspace/3-test-kanitts
+make eval
+```
+**Output**: /data/5-kani-tts-output/<speaker>
+
 ## Exit the terminal when done
 ```bash
 exit
@@ -104,7 +112,7 @@ In case you want to modify the individual projects that are part of this docker 
     git clone https://github.com/feifel/kani-tts-training-dataset2nano.git 2-dataset-to-nano
     git clone https://github.com/feifel/kani-tts-training-finetune.git 3-nano-to-kanitts
     ```   
-3. You can now start your id:
+3. You can now start your IDE:
     ```bash
     deepagent-app 1-audio-to-dataset
     ```   
