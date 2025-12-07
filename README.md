@@ -35,33 +35,36 @@ mkdir -p /data/0-source-audio
 cd /workspace/1-audio-to-dataset
 source "venv/bin/activate"
 python chunk_and_transcribe.py \
-  -i /data/0-source-audio/Linda.wav \
-  -o /data/1-audio-chunks/Linda \
-  --silence_duration 0.5 \
-  --max_chunk_duration 5.0 \
-  --model large-v3 \
-  --device cuda \
-  --format csv \
-  --language de \
-  --speaker Linda
-python chunk_and_transcribe.py \
-  -i /data/0-source-audio/Lisa.wav \
-  -o /data/1-audio-chunks/Lisa \
-  --silence_duration 0.3 \
+  -i /data/0-source-audio/Anna.flac \
+  -o /data/1-audio-chunks/Anna \
+  --silence_duration 0.9 \
   --max_chunk_duration 10.0 \
   --model large-v3 \
   --device cuda \
   --format csv \
   --language de \
-  --speaker Lisa
+  --speaker Anna
+python chunk_and_transcribe.py \
+  -i /data/0-source-audio/Florian.flac \
+  -o /data/1-audio-chunks/Florian \
+  --silence_duration 0.9 \
+  --max_chunk_duration 10.0 \
+  --model large-v3 \
+  --device cuda \
+  --format csv \
+  --language de \
+  --speaker Florian
 ```
 **Output**: Subfolder with your speakers name in /data/1-audio-chunks/<speaker>
 
 ## 2. Create the base dataset
 **Prerequisite**: audio junks and manifest.csv in /data/1-audio-chunks/<speaker>
 ```bash
-python create_base_dataset.py Linda
-python create_base_dataset.py Lisa
+cd /workspace/1-audio-to-dataset
+source "venv/bin/activate"
+python create_base_dataset.py Anna 24000
+python create_base_dataset.py Florian 24000
+deactivate
 ```
 **Output**: nano dataset in /data/2-base-datasets/<speaker>
 
@@ -72,6 +75,7 @@ cd /workspace/2-dataset-to-nano
 source "venv/bin/activate"
 # befor run the next command, edit the config.yaml for your needs
 python main.py
+deactivate
 ```
 **Output**: nano dataset in /data/3-nano-datasets/<speaker>
 
