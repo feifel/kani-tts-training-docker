@@ -44,6 +44,16 @@ python chunk_and_transcribe.py \
   --format csv \
   --language de \
   --speaker Linda
+python chunk_and_transcribe.py \
+  -i /data/0-source-audio/Lisa.wav \
+  -o /data/1-audio-chunks/Lisa \
+  --silence_duration 0.3 \
+  --max_chunk_duration 10.0 \
+  --model large-v3 \
+  --device cuda \
+  --format csv \
+  --language de \
+  --speaker Lisa
 ```
 **Output**: Subfolder with your speakers name in /data/1-audio-chunks/<speaker>
 
@@ -51,6 +61,7 @@ python chunk_and_transcribe.py \
 **Prerequisite**: audio junks and manifest.csv in /data/1-audio-chunks/<speaker>
 ```bash
 python create_base_dataset.py Linda
+python create_base_dataset.py Lisa
 ```
 **Output**: nano dataset in /data/2-base-datasets/<speaker>
 
@@ -70,8 +81,8 @@ python main.py
 cd /workspace/3-nano-to-kanitts
 make login
 # befor run the next command, edit the following config files:
-# - dataset_config.yaml
-# - experiments.yaml
+# - config/dataset_config.yaml
+# - config/experiments.yaml
 make train
 ```
 **Output**: /data/4-kani-tts-models/<speaker>
@@ -79,7 +90,7 @@ make train
 ## 5. Test the new kani-tts-model
 **Prerequisite**: Ensure the kani-tts-model is available in /data/4-kani-tts-models/<speaker>
 ```bash
-cd /workspace/3-test-kanitts
+cd /workspace/3-nano-to-kanitts
 make eval
 ```
 **Output**: /data/5-kani-tts-output/<speaker>
@@ -150,3 +161,5 @@ In case you want to modify the individual projects that are part of this docker 
     ```
 
 
+# TODO
+Maybe increase audio chunk size from 5s to 12s, since it looks like the model has lost a bit the ability to generate the audio for long sentences. 

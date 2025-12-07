@@ -1,5 +1,5 @@
 # Use the prebuilt PyTorch image (PyTorch + CUDA libs preinstalled)
-FROM pytorch/pytorch:2.5.0-cuda12.4-cudnn9-devel
+FROM pytorch/pytorch:2.8.0-cuda12.9-cudnn9-devel
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sox \
     libcudnn8 \
     software-properties-common \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 # Setup kani-tts-training-wave2dataset
