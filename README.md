@@ -54,6 +54,8 @@ python chunk_and_transcribe.py \
   --format csv \
   --language de \
   --speaker Florian
+
+deactivate
 ```
 **Output**: Subfolder with your speakers name in /data/1-audio-chunks/<speaker>
 
@@ -90,6 +92,18 @@ make login
 make train
 ```
 **Output**: /data/4-kani-tts-models/<speaker>
+
+Please note that the file **config.json** does for some reasons not contain the **speaker_list**, you need to add it manually, so that the file end with this:
+```
+  "use_pos_enc": true,
+  "vocab_size": 80539,
+  "speaker_settings": {
+                        "status": "multispeaker",
+                        "speaker_list": ["anna", "florian"]
+                      }
+}
+
+```
 
 ## 5. Test the new kani-tts-model
 **Prerequisite**: Ensure the kani-tts-model is available in /data/4-kani-tts-models/<speaker>
